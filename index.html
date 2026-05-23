@@ -2851,7 +2851,7 @@ body.project-modal-open .modal-close-btn--project::after {
               <a href="https://www.linkedin.com/in/dana-yeleuova-60a7b1379" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="LinkedIn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/></svg>
               </a>
-              <a href="https://web.telegram.org/k/#@yoitsdana" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Telegram">
+              <a href="https://t.me/yoitsdana" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Telegram">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.23c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"/></svg>
               </a>
             </div>
@@ -3843,6 +3843,8 @@ function buildPortfolioGallery(projectId, title) {
         video.className = 'draftt-gallery-video';
         video.src = portfolioSrc(item.src);
         video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
         video.preload = 'metadata';
         video.controls = false;
         if (item.poster) video.poster = portfolioSrc(item.poster);
@@ -3864,6 +3866,7 @@ function buildPortfolioGallery(projectId, title) {
           startPlay();
         });
         video.addEventListener('click', () => {
+          if (video.controls) return;
           if (video.paused) startPlay();
         });
         video.addEventListener('ended', () => {
@@ -4592,50 +4595,50 @@ const ARTIST_SECTIONS = [
     id: 'sketches',
     title: 'Sketches',
     images: [
-      'artist/Sketches/2 1_результат.webp',
-      'artist/Sketches/2 3_результат.webp',
-      'artist/Sketches/3 1_результат.webp',
-      'artist/Sketches/3 3_результат.webp',
-      'artist/Sketches/4 299_результат.webp',
-      'artist/Sketches/4 300_результат.webp',
-      'artist/Sketches/PAoUxzsb9YE 1_результат.webp',
-      'artist/Sketches/image 11_результат.webp',
-      'artist/Sketches/image 13_результат.webp',
-      'artist/Sketches/image 14_результат.webp'
+      'Artist/Sketches/2 1_результат.webp',
+      'Artist/Sketches/2 3_результат.webp',
+      'Artist/Sketches/3 1_результат.webp',
+      'Artist/Sketches/3 3_результат.webp',
+      'Artist/Sketches/4 299_результат.webp',
+      'Artist/Sketches/4 300_результат.webp',
+      'Artist/Sketches/PAoUxzsb9YE 1_результат.webp',
+      'Artist/Sketches/image 11_результат.webp',
+      'Artist/Sketches/image 13_результат.webp',
+      'Artist/Sketches/image 14_результат.webp'
     ]
   },
   {
     id: 'digital',
     title: 'Digital Arts',
     images: [
-      'artist/Digital art/2 2_результат.webp',
-      'artist/Digital art/3 2_результат.webp',
-      'artist/Digital art/3 4_результат.webp',
-      'artist/Digital art/4297cf16-327c-43b5-84aa-6ff681f0dd8c 1_результат.webp',
-      'artist/Digital art/45b4e0d6-76ca-4ab2-bd90-044b0438ba9d 1_результат.webp',
-      'artist/Digital art/5 1_результат.webp',
-      'artist/Digital art/75a4a249-011c-4b1c-8542-ea0159feace7 1_результат.webp',
-      'artist/Digital art/EMps9bznIJI 1_результат.webp',
-      'artist/Digital art/Mz49C4SixW0 1_результат.webp',
-      'artist/Digital art/a0cd1a54-a582-4a9e-9994-325746edf28a 1_результат.webp',
-      'artist/Digital art/c4746b54-3fa1-4171-8ab2-ad59adae8d8b 1_результат.webp',
-      'artist/Digital art/image 15 (1)_результат.webp'
+      'Artist/Digital art/2 2_результат.webp',
+      'Artist/Digital art/3 2_результат.webp',
+      'Artist/Digital art/3 4_результат.webp',
+      'Artist/Digital art/4297cf16-327c-43b5-84aa-6ff681f0dd8c 1_результат.webp',
+      'Artist/Digital art/45b4e0d6-76ca-4ab2-bd90-044b0438ba9d 1_результат.webp',
+      'Artist/Digital art/5 1_результат.webp',
+      'Artist/Digital art/75a4a249-011c-4b1c-8542-ea0159feace7 1_результат.webp',
+      'Artist/Digital art/EMps9bznIJI 1_результат.webp',
+      'Artist/Digital art/Mz49C4SixW0 1_результат.webp',
+      'Artist/Digital art/a0cd1a54-a582-4a9e-9994-325746edf28a 1_результат.webp',
+      'Artist/Digital art/c4746b54-3fa1-4171-8ab2-ad59adae8d8b 1_результат.webp',
+      'Artist/Digital art/image 15 (1)_результат.webp'
     ]
   },
   {
     id: 'paintings',
     title: 'Paintings',
     images: [
-      'artist/Painting/0L5iapU30YM 1_результат.webp',
-      'artist/Painting/7 6_результат.webp',
-      'artist/Painting/8077390e-3246-4fe9-be99-a47de722c3ee 1_результат.webp',
-      'artist/Painting/H8XXoHQOntI 1_результат.webp',
-      'artist/Painting/MwOId5upANI 1_результат.webp',
-      'artist/Painting/WgpnMvZL9L0 1_результат.webp',
-      'artist/Painting/image 10_результат.webp',
-      'artist/Painting/image 12_результат.webp',
-      'artist/Painting/image 9_результат.webp',
-      'artist/Painting/tnazb4iYy6o 1_результат.webp'
+      'Artist/Painting/0L5iapU30YM 1_результат.webp',
+      'Artist/Painting/7 6_результат.webp',
+      'Artist/Painting/8077390e-3246-4fe9-be99-a47de722c3ee 1_результат.webp',
+      'Artist/Painting/H8XXoHQOntI 1_результат.webp',
+      'Artist/Painting/MwOId5upANI 1_результат.webp',
+      'Artist/Painting/WgpnMvZL9L0 1_результат.webp',
+      'Artist/Painting/image 10_результат.webp',
+      'Artist/Painting/image 12_результат.webp',
+      'Artist/Painting/image 9_результат.webp',
+      'Artist/Painting/tnazb4iYy6o 1_результат.webp'
     ]
   }
 ];
@@ -4667,7 +4670,7 @@ function isArtistModalOpen() {
 }
 
 function artistSrc(path) {
-  return encodeURI(path);
+  return path.split('/').map((part) => encodeURIComponent(part)).join('/');
 }
 
 function whenArtistImagesReady(carousel) {
