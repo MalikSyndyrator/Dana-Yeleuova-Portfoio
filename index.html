@@ -1445,6 +1445,39 @@ body.project-modal-open .modal-close-btn--project::after {
   transition: none !important;
   will-change: auto;
 }
+.artist-carousel-hint {
+  display: none;
+  margin: 10px 0 0;
+  padding-right: 2px;
+  text-align: right;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #777;
+}
+.artist-carousel--touch + .artist-carousel-hint:not([hidden]) {
+  display: block;
+  animation: artist-swipe-hint-pulse 2.4s ease-in-out infinite;
+}
+@keyframes artist-swipe-hint-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .artist-carousel--touch + .artist-carousel-hint:not([hidden]) {
+    animation: none;
+    opacity: 0.85;
+  }
+}
+@media (max-width: 767px) {
+  .artist-carousel-hint {
+    margin-top: 8px;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+}
 @media (max-width: 900px) {
   .artist-carousel-viewport {
     --artist-strip-h: clamp(210px, 32vh, 300px);
@@ -4711,10 +4744,18 @@ function isArtistTouchScroll() {
   return ARTIST_TOUCH_SCROLL_MQ.matches;
 }
 
+function updateArtistCarouselHint(carousel) {
+  if (!carousel.hint || !carousel.viewport) return;
+  const touch = isArtistTouchScroll();
+  const scrollable = carousel.viewport.scrollWidth > carousel.viewport.clientWidth + 2;
+  carousel.hint.hidden = !(touch && scrollable);
+}
+
 function applyArtistCarouselMode(carousel) {
   if (!carousel.row || !carousel.track || !carousel.viewport) return;
   const touch = isArtistTouchScroll();
   carousel.row.classList.toggle('artist-carousel--touch', touch);
+  updateArtistCarouselHint(carousel);
   if (touch) {
     carousel.track.style.transform = 'none';
     carousel.track.style.transition = 'none';
@@ -4788,6 +4829,7 @@ function layoutArtistCarousel(carousel) {
     if (!carousel.viewport.isConnected) return;
     if (isArtistTouchScroll()) {
       carousel.track.style.transform = 'none';
+      updateArtistCarouselHint(carousel);
       return;
     }
     const maxIndex = getArtistCarouselMaxIndex(carousel);
@@ -4867,6 +4909,12 @@ function buildArtistCarousel(config) {
   row.appendChild(next);
   wrap.appendChild(row);
 
+  const hint = document.createElement('p');
+  hint.className = 'artist-carousel-hint';
+  hint.textContent = 'Swipe';
+  hint.hidden = true;
+  wrap.appendChild(hint);
+
   const carousel = {
     wrap,
     row,
@@ -4875,6 +4923,7 @@ function buildArtistCarousel(config) {
     slides,
     prev,
     next,
+    hint,
     images: config.images,
     index: 0
   };
