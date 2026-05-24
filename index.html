@@ -3503,7 +3503,6 @@ const TABLET_MQ = window.matchMedia('(max-width: 1366px)');
 const mobileCardColorTriggers = [];
 let modalOpenProjectCard = null;
 let modalOpenTl = null;
-let modalScrollGuard = null;
 
 const MODAL_REVEAL_SEL = '.modal-num, .modal-title, .modal-meta-item, .modal-content-rich, .modal-gallery-img, .draftt-gallery-item';
 
@@ -3513,31 +3512,7 @@ function preserveModalScroll(apply) {
   if (modal) modal.scrollTop = scrollTop;
 }
 
-function unbindModalScrollGuard() {
-  if (!modalScrollGuard || !modal) return;
-  modal.removeEventListener('scroll', modalScrollGuard);
-  modalScrollGuard = null;
-}
-
-function bindModalScrollGuard() {
-  unbindModalScrollGuard();
-  if (!modal) return;
-  modalScrollGuard = () => {
-    if (!modalOpenTl || modal.scrollTop < 2) return;
-    const scrollTop = modal.scrollTop;
-    killModalOpenAnimation();
-    preserveModalScroll(() => {
-      gsap.set(modal, { opacity: 1, clearProps: 'yPercent,transform' });
-      setModalRevealInstant();
-    });
-    modal.scrollTop = scrollTop;
-    resetDesktopCursorState();
-  };
-  modal.addEventListener('scroll', modalScrollGuard, { passive: true });
-}
-
 function killModalOpenAnimation() {
-  unbindModalScrollGuard();
   if (modalOpenTl) {
     modalOpenTl.kill();
     modalOpenTl = null;
@@ -3554,15 +3529,26 @@ function setModalRevealInstant() {
   gsap.set('.modal-hero-img', { scale: 1, clearProps: 'transform' });
 }
 
+function flushDeferredMatchSizeRows() {
+  preserveModalScroll(() => {
+    matchSizeRows.forEach((row) => {
+      if (row._matchSizePendingAfterOpen && typeof row._matchSizeApply === 'function') {
+        row._matchSizePendingAfterOpen = false;
+        row._matchSizeApply();
+      }
+    });
+  });
+}
+
 function buildModalOpenTimeline(projectId, touchModalMotion) {
   modalOpenTl = gsap.timeline({
     onComplete: () => {
       modalOpenTl = null;
-      unbindModalScrollGuard();
       preserveModalScroll(() => {
         gsap.set(modal, { clearProps: 'yPercent,transform' });
-        setModalRevealInstant();
+        if (!touchModalMotion) setModalRevealInstant();
       });
+      if (touchModalMotion) flushDeferredMatchSizeRows();
       resetDesktopCursorState();
     }
   });
@@ -3586,8 +3572,6 @@ function buildModalOpenTimeline(projectId, touchModalMotion) {
       .to(['.modal-gallery-img', '.draftt-gallery-item'], {
         opacity: 1, duration: 0.5, stagger: 0.05, ease: 'expo.out'
       }, '-=0.35');
-
-    bindModalScrollGuard();
     return;
   }
 
@@ -4062,43 +4046,54 @@ function equalizeDrafttMatchSizeRow(rowEl) {
   const imgs = [...rowEl.querySelectorAll('.draftt-gallery-media img')];
   if (imgs.length < 2) return;
   const apply = () => {
-    const heights = imgs.map((img) => {
-      const colW = img.parentElement?.clientWidth || img.clientWidth;
-      if (!colW || !img.naturalWidth) return null;
-      return (img.naturalHeight / img.naturalWidth) * colW;
-    }).filter((h) => h != null);
-    if (heights.length < 2) return;
-
-    const isThisismeDuo = rowEl.classList.contains('draftt-gallery-row--thisisme-duo');
-    let targetH;
-    if (isThisismeDuo) {
-      const headImg = imgs[1];
-      const colW = headImg.parentElement?.clientWidth || headImg.clientWidth;
-      if (!colW || !headImg.naturalWidth) return;
-      targetH = (headImg.naturalHeight / headImg.naturalWidth) * colW;
-    } else {
-      const scale = parseFloat(rowEl.dataset.matchScale) || 1;
-      targetH = Math.min(...heights) * scale;
+    if (modalOpenTl && isTabletCardColorMode()) {
+      rowEl._matchSizePendingAfterOpen = true;
+      return;
     }
-    imgs.forEach((img, idx) => {
-      img.style.width = 'auto';
-      img.style.maxWidth = '100%';
-      img.style.height = `${targetH}px`;
-      img.style.maxHeight = `${targetH}px`;
-      img.style.objectFit = 'contain';
-      img.style.objectPosition = isThisismeDuo
-        ? (idx === 0 ? 'left bottom' : 'right bottom')
-        : 'center bottom';
-      img.style.margin = isThisismeDuo ? '0' : '0 auto';
-      img.style.display = 'block';
-    });
-    rowEl.querySelectorAll('.draftt-gallery-media').forEach((media, idx) => {
-      media.style.minHeight = `${targetH}px`;
-      media.style.alignItems = 'flex-end';
+    const run = () => {
+      const heights = imgs.map((img) => {
+        const colW = img.parentElement?.clientWidth || img.clientWidth;
+        if (!colW || !img.naturalWidth) return null;
+        return (img.naturalHeight / img.naturalWidth) * colW;
+      }).filter((h) => h != null);
+      if (heights.length < 2) return;
+
+      const isThisismeDuo = rowEl.classList.contains('draftt-gallery-row--thisisme-duo');
+      let targetH;
       if (isThisismeDuo) {
-        media.style.justifyContent = idx === 0 ? 'flex-start' : 'flex-end';
+        const headImg = imgs[1];
+        const colW = headImg.parentElement?.clientWidth || headImg.clientWidth;
+        if (!colW || !headImg.naturalWidth) return;
+        targetH = (headImg.naturalHeight / headImg.naturalWidth) * colW;
+      } else {
+        const scale = parseFloat(rowEl.dataset.matchScale) || 1;
+        targetH = Math.min(...heights) * scale;
       }
-    });
+      imgs.forEach((img, idx) => {
+        img.style.width = 'auto';
+        img.style.maxWidth = '100%';
+        img.style.height = `${targetH}px`;
+        img.style.maxHeight = `${targetH}px`;
+        img.style.objectFit = 'contain';
+        img.style.objectPosition = isThisismeDuo
+          ? (idx === 0 ? 'left bottom' : 'right bottom')
+          : 'center bottom';
+        img.style.margin = isThisismeDuo ? '0' : '0 auto';
+        img.style.display = 'block';
+      });
+      rowEl.querySelectorAll('.draftt-gallery-media').forEach((media, idx) => {
+        media.style.minHeight = `${targetH}px`;
+        media.style.alignItems = 'flex-end';
+        if (isThisismeDuo) {
+          media.style.justifyContent = idx === 0 ? 'flex-start' : 'flex-end';
+        }
+      });
+    };
+    if (modal && modal.style.display === 'block' && isTabletCardColorMode()) {
+      preserveModalScroll(run);
+    } else {
+      run();
+    }
   };
   rowEl._matchSizeApply = apply;
   let pending = 0;
@@ -4357,7 +4352,6 @@ function restoreTabletCardColorsAfterModal() {
 }
 
 function finishCloseModal() {
-  unbindModalScrollGuard();
   stopModalVideos();
   resetProjectModalScroll();
   modal.style.display = 'none';
