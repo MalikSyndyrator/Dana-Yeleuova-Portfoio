@@ -2,7 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<script>
+(function () {
+  var mq = window.matchMedia('(hover: none), (pointer: coarse), (max-width: 1366px)');
+  function blockZoom() {
+    if (!mq.matches) return;
+    document.addEventListener('gesturestart', function (e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('gesturechange', function (e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('gestureend', function (e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('touchmove', function (e) {
+      if (e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+  }
+  blockZoom();
+})();
+</script>
 <title>Portfolio — Graphic Designer</title>
 <meta name="description" content="Graphic designer portfolio — curated works in branding, editorial, and visual identity."/>
 <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32"/>
@@ -33,7 +48,12 @@ html{
 html.is-scroll-locked{
   overflow: hidden;
 }
-@media (hover: none), (pointer: coarse) {
+@media (hover: none), (pointer: coarse), (max-width: 1366px) {
+  html,
+  body {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+  }
   html.is-scroll-locked {
     overflow: visible;
   }
@@ -44,6 +64,7 @@ html.is-scroll-locked{
     width: 100%;
     overflow: hidden;
     overscroll-behavior: none;
+    touch-action: manipulation;
   }
   body,
   #project-modal.project-modal--site,
@@ -55,7 +76,7 @@ html.is-scroll-locked{
   #artist-modal,
   #education-modal {
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-x pan-y pinch-zoom;
+    touch-action: manipulation;
   }
 }
 html.is-scroll-locked nav{
