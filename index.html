@@ -78,10 +78,6 @@ html.is-scroll-locked{
     -webkit-overflow-scrolling: touch;
     touch-action: manipulation;
   }
-  #project-modal .draftt-gallery-row {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 420px;
-  }
 }
 html.is-scroll-locked nav{
   padding-right: calc(48px + var(--scrollbar-width, 0px));
@@ -3506,174 +3502,6 @@ const IPAD_MQ = window.matchMedia('(min-width: 768px) and (max-width: 1366px)');
 const TABLET_MQ = window.matchMedia('(max-width: 1366px)');
 const mobileCardColorTriggers = [];
 let modalOpenProjectCard = null;
-let modalOpenTl = null;
-let modalScrollPauseTimer = null;
-let modalScrollPauseHandler = null;
-
-const MODAL_REVEAL_SEL = '.modal-num, .modal-title, .modal-meta-item, .modal-content-rich, .modal-gallery-img, .draftt-gallery-item';
-const MODAL_TOUCH_HEADER_SEL = '.modal-num, .modal-title, .modal-meta-item, .modal-content-rich';
-const MODAL_TOUCH_GALLERY_SEL = '.modal-gallery-img, .draftt-gallery-item';
-
-function preserveModalScroll(apply) {
-  const scrollTop = modal ? modal.scrollTop : 0;
-  apply();
-  if (modal) modal.scrollTop = scrollTop;
-}
-
-function unbindModalOpenScrollPause() {
-  clearTimeout(modalScrollPauseTimer);
-  if (modal && modalScrollPauseHandler) {
-    modal.removeEventListener('scroll', modalScrollPauseHandler);
-  }
-  modalScrollPauseHandler = null;
-}
-
-function bindModalOpenScrollPause() {
-  unbindModalOpenScrollPause();
-  if (!modal) return;
-  modalScrollPauseHandler = () => {
-    if (modalOpenTl?.isActive()) modalOpenTl.pause();
-    clearTimeout(modalScrollPauseTimer);
-    modalScrollPauseTimer = setTimeout(() => {
-      if (modalOpenTl?.paused()) modalOpenTl.resume();
-    }, 100);
-  };
-  modal.addEventListener('scroll', modalScrollPauseHandler, { passive: true });
-}
-
-function waitModalScrollIdle(fn) {
-  let timer;
-  const done = () => {
-    if (modal) modal.removeEventListener('scroll', onScroll);
-    fn();
-  };
-  const onScroll = () => {
-    clearTimeout(timer);
-    timer = setTimeout(done, 120);
-  };
-  if (modal) modal.addEventListener('scroll', onScroll, { passive: true });
-  timer = setTimeout(done, 120);
-}
-
-function killModalOpenAnimation() {
-  unbindModalOpenScrollPause();
-  if (modalOpenTl) {
-    modalOpenTl.kill();
-    modalOpenTl = null;
-  }
-  gsap.killTweensOf(modal);
-  gsap.killTweensOf(MODAL_REVEAL_SEL);
-  gsap.killTweensOf('.modal-hero-img-wrap');
-  gsap.killTweensOf('.modal-hero-img');
-}
-
-function setModalRevealInstant() {
-  gsap.set(MODAL_REVEAL_SEL, { opacity: 1, y: 0, clearProps: 'transform' });
-  gsap.set('.modal-hero-img-wrap', { clipPath: 'inset(0% 0 0 0)', clearProps: 'transform' });
-  gsap.set('.modal-hero-img', { scale: 1, clearProps: 'transform' });
-}
-
-function flushDeferredMatchSizeRows() {
-  preserveModalScroll(() => {
-    matchSizeRows.forEach((row) => {
-      if (row._matchSizePendingAfterOpen && typeof row._matchSizeApply === 'function') {
-        row._matchSizePendingAfterOpen = false;
-        row._matchSizeApply();
-      }
-    });
-  });
-}
-
-function finishTouchModalOpen() {
-  preserveModalScroll(() => {
-    gsap.set(modal, { clearProps: 'yPercent,transform' });
-  });
-  flushDeferredMatchSizeRows();
-  resetDesktopCursorState();
-}
-
-function buildModalOpenTimeline(projectId, touchModalMotion) {
-  modalOpenTl = gsap.timeline({
-    onComplete: () => {
-      modalOpenTl = null;
-      unbindModalOpenScrollPause();
-      if (touchModalMotion) {
-        waitModalScrollIdle(finishTouchModalOpen);
-        return;
-      }
-      preserveModalScroll(() => {
-        gsap.set(modal, { clearProps: 'yPercent,transform' });
-        setModalRevealInstant();
-      });
-      resetDesktopCursorState();
-    }
-  });
-
-  if (touchModalMotion) {
-    gsap.set(modal, { display: 'block', opacity: 0, clearProps: 'yPercent,transform' });
-    gsap.set(MODAL_TOUCH_HEADER_SEL, { opacity: 0, y: 0 });
-    gsap.set(MODAL_TOUCH_GALLERY_SEL, { opacity: 1, y: 0 });
-    gsap.set('.modal-hero-img-wrap', { clipPath: 'inset(0% 0 0 0)' });
-    gsap.set('.modal-hero-img', { scale: 1 });
-
-    modalOpenTl.to(modal, { opacity: 1, duration: 0.55, ease: 'reveal' })
-      .to(['.modal-num', '.modal-title'], {
-        opacity: 1, duration: 0.45, stagger: 0.06, ease: 'expo.out'
-      }, '-=0.4')
-      .to('.modal-meta-item', {
-        opacity: 1, duration: 0.4, stagger: 0.05, ease: 'expo.out'
-      }, '-=0.3')
-      .to('.modal-content-rich', {
-        opacity: 1, duration: 0.45, ease: 'expo.out'
-      }, '-=0.25');
-
-    bindModalOpenScrollPause();
-    return;
-  }
-
-  gsap.set(modal, { display: 'block', opacity: 0, yPercent: 30 });
-
-  modalOpenTl.to(modal, {
-    opacity: 1,
-    yPercent: 0,
-    duration: 0.8,
-    ease: 'reveal'
-  })
-  .fromTo(['.modal-num', '.modal-title'], {
-    y: 40, opacity: 0
-  }, {
-    y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'expo.out'
-  }, '-=0.4')
-  .fromTo('.modal-meta-item', {
-    y: 20, opacity: 0
-  }, {
-    y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: 'expo.out'
-  }, '-=0.3')
-  .fromTo('.modal-content-rich', {
-    y: 20, opacity: 0
-  }, {
-    y: 0, opacity: 1, duration: 0.6, ease: 'expo.out'
-  }, '-=0.4');
-
-  if (!isPortfolioProject(projectId)) {
-    modalOpenTl.fromTo('.modal-hero-img-wrap', {
-      clipPath: 'inset(100% 0 0 0)'
-    }, {
-      clipPath: 'inset(0% 0 0 0)', duration: 0.8, ease: 'reveal'
-    }, '-=0.5')
-    .fromTo('.modal-hero-img', {
-      scale: 1.2
-    }, {
-      scale: 1.0, duration: 1.2, ease: 'expo.out'
-    }, '-=0.8');
-  }
-
-  modalOpenTl.fromTo(['.modal-gallery-img', '.draftt-gallery-item'], {
-    y: 40, opacity: 0
-  }, {
-    y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: 'expo.out'
-  }, '-=0.5');
-}
 
 function isTabletCardColorMode() {
   return PHONE_MQ.matches || IPAD_MQ.matches;
@@ -4079,7 +3907,7 @@ function purgeDisconnectedMatchSizeRows() {
 }
 
 function scheduleMatchSizeRelayout() {
-  if (isPinchZoomed() || modalOpenTl) return;
+  if (isPinchZoomed()) return;
   purgeDisconnectedMatchSizeRows();
   cancelAnimationFrame(matchSizeRaf);
   matchSizeRaf = requestAnimationFrame(() => {
@@ -4102,54 +3930,43 @@ function equalizeDrafttMatchSizeRow(rowEl) {
   const imgs = [...rowEl.querySelectorAll('.draftt-gallery-media img')];
   if (imgs.length < 2) return;
   const apply = () => {
-    if (modalOpenTl && isTabletCardColorMode()) {
-      rowEl._matchSizePendingAfterOpen = true;
-      return;
-    }
-    const run = () => {
-      const heights = imgs.map((img) => {
-        const colW = img.parentElement?.clientWidth || img.clientWidth;
-        if (!colW || !img.naturalWidth) return null;
-        return (img.naturalHeight / img.naturalWidth) * colW;
-      }).filter((h) => h != null);
-      if (heights.length < 2) return;
+    const heights = imgs.map((img) => {
+      const colW = img.parentElement?.clientWidth || img.clientWidth;
+      if (!colW || !img.naturalWidth) return null;
+      return (img.naturalHeight / img.naturalWidth) * colW;
+    }).filter((h) => h != null);
+    if (heights.length < 2) return;
 
-      const isThisismeDuo = rowEl.classList.contains('draftt-gallery-row--thisisme-duo');
-      let targetH;
-      if (isThisismeDuo) {
-        const headImg = imgs[1];
-        const colW = headImg.parentElement?.clientWidth || headImg.clientWidth;
-        if (!colW || !headImg.naturalWidth) return;
-        targetH = (headImg.naturalHeight / headImg.naturalWidth) * colW;
-      } else {
-        const scale = parseFloat(rowEl.dataset.matchScale) || 1;
-        targetH = Math.min(...heights) * scale;
-      }
-      imgs.forEach((img, idx) => {
-        img.style.width = 'auto';
-        img.style.maxWidth = '100%';
-        img.style.height = `${targetH}px`;
-        img.style.maxHeight = `${targetH}px`;
-        img.style.objectFit = 'contain';
-        img.style.objectPosition = isThisismeDuo
-          ? (idx === 0 ? 'left bottom' : 'right bottom')
-          : 'center bottom';
-        img.style.margin = isThisismeDuo ? '0' : '0 auto';
-        img.style.display = 'block';
-      });
-      rowEl.querySelectorAll('.draftt-gallery-media').forEach((media, idx) => {
-        media.style.minHeight = `${targetH}px`;
-        media.style.alignItems = 'flex-end';
-        if (isThisismeDuo) {
-          media.style.justifyContent = idx === 0 ? 'flex-start' : 'flex-end';
-        }
-      });
-    };
-    if (modal && modal.style.display === 'block' && isTabletCardColorMode()) {
-      preserveModalScroll(run);
+    const isThisismeDuo = rowEl.classList.contains('draftt-gallery-row--thisisme-duo');
+    let targetH;
+    if (isThisismeDuo) {
+      const headImg = imgs[1];
+      const colW = headImg.parentElement?.clientWidth || headImg.clientWidth;
+      if (!colW || !headImg.naturalWidth) return;
+      targetH = (headImg.naturalHeight / headImg.naturalWidth) * colW;
     } else {
-      run();
+      const scale = parseFloat(rowEl.dataset.matchScale) || 1;
+      targetH = Math.min(...heights) * scale;
     }
+    imgs.forEach((img, idx) => {
+      img.style.width = 'auto';
+      img.style.maxWidth = '100%';
+      img.style.height = `${targetH}px`;
+      img.style.maxHeight = `${targetH}px`;
+      img.style.objectFit = 'contain';
+      img.style.objectPosition = isThisismeDuo
+        ? (idx === 0 ? 'left bottom' : 'right bottom')
+        : 'center bottom';
+      img.style.margin = isThisismeDuo ? '0' : '0 auto';
+      img.style.display = 'block';
+    });
+    rowEl.querySelectorAll('.draftt-gallery-media').forEach((media, idx) => {
+      media.style.minHeight = `${targetH}px`;
+      media.style.alignItems = 'flex-end';
+      if (isThisismeDuo) {
+        media.style.justifyContent = idx === 0 ? 'flex-start' : 'flex-end';
+      }
+    });
   };
   rowEl._matchSizeApply = apply;
   let pending = 0;
@@ -4324,13 +4141,57 @@ cards.forEach(card => {
     mDesc.textContent = desc;
     mImg.src = portfolioSrc(imgUrl);
     setModalGallery(card, title);
-    killModalOpenAnimation();
     lockPageScroll();
 
     const touchModalMotion = isTabletCardColorMode();
+    gsap.set(modal, touchModalMotion
+      ? { display: 'block', opacity: 0, clearProps: 'yPercent,transform' }
+      : { display: 'block', opacity: 0, yPercent: 30 });
     resetProjectModalScroll();
-    showProjectCloseBtn(touchModalMotion ? 0.1 : 0.15);
-    buildModalOpenTimeline(projectId, touchModalMotion);
+    showProjectCloseBtn(0.15);
+
+    const tlModal = gsap.timeline({
+      onComplete: () => {
+        resetDesktopCursorState();
+        if (touchModalMotion) gsap.set(modal, { clearProps: 'transform,yPercent' });
+      }
+    });
+
+    tlModal.to(modal, touchModalMotion
+      ? { opacity: 1, duration: 0.8, ease: "reveal" }
+      : { opacity: 1, yPercent: 0, duration: 0.8, ease: "reveal" })
+    .fromTo(['.modal-num', '.modal-title'], {
+      y: 40, opacity: 0
+    }, {
+      y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "expo.out"
+    }, "-=0.4")
+    .fromTo('.modal-meta-item', {
+      y: 20, opacity: 0
+    }, {
+      y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: "expo.out"
+    }, "-=0.3")
+    .fromTo('.modal-content-rich', {
+      y: 20, opacity: 0
+    }, {
+      y: 0, opacity: 1, duration: 0.6, ease: "expo.out"
+    }, "-=0.4");
+    if (!isPortfolioProject(projectId)) {
+      tlModal.fromTo('.modal-hero-img-wrap', {
+        clipPath: 'inset(100% 0 0 0)'
+      }, {
+        clipPath: 'inset(0% 0 0 0)', duration: 0.8, ease: "reveal"
+      }, "-=0.5")
+      .fromTo('.modal-hero-img', {
+        scale: 1.2
+      }, {
+        scale: 1.0, duration: 1.2, ease: "expo.out"
+      }, "-=0.8");
+    }
+    tlModal.fromTo(['.modal-gallery-img', '.draftt-gallery-item'], {
+      y: 40, opacity: 0
+    }, {
+      y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "expo.out"
+    }, "-=0.5");
   });
 });
 
@@ -4411,9 +4272,7 @@ function finishCloseModal() {
   stopModalVideos();
   resetProjectModalScroll();
   modal.style.display = 'none';
-  preserveModalScroll(() => {
-    gsap.set(modal, { clearProps: 'opacity,yPercent,transform' });
-  });
+  gsap.set(modal, { clearProps: 'opacity,yPercent,transform' });
   document.body.classList.remove('project-modal-open');
   if (closeBtn) gsap.set(closeBtn, { clearProps: 'opacity' });
   modal.classList.remove('project-modal--site');
@@ -4429,14 +4288,13 @@ function finishCloseModal() {
 function closeModal() {
   resetDesktopCursorState();
   stopModalVideos();
-  killModalOpenAnimation();
   unlockPageScroll();
   hideProjectCloseBtn();
 
   const touchModalMotion = isTabletCardColorMode();
   gsap.to(modal, touchModalMotion
-    ? { opacity: 0, duration: 0.45, ease: 'power3.inOut', onComplete: finishCloseModal }
-    : { opacity: 0, yPercent: 20, duration: 0.6, ease: 'power3.inOut', onComplete: finishCloseModal });
+    ? { opacity: 0, duration: 0.6, ease: "power3.inOut", onComplete: finishCloseModal }
+    : { opacity: 0, yPercent: 20, duration: 0.6, ease: "power3.inOut", onComplete: finishCloseModal });
 }
 
 /* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
