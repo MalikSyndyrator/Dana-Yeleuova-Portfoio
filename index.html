@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Portfolio — Graphic Designer</title>
 <meta name="description" content="Graphic designer portfolio — curated works in branding, editorial, and visual identity."/>
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32"/>
 <link rel="icon" href="bird.webp" type="image/webp"/>
-<link rel="shortcut icon" href="bird.webp" type="image/webp"/>
-<link rel="apple-touch-icon" href="bird.webp"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -32,6 +32,31 @@ html{
 }
 html.is-scroll-locked{
   overflow: hidden;
+}
+@media (hover: none), (pointer: coarse) {
+  html.is-scroll-locked {
+    overflow: visible;
+  }
+  html.is-scroll-locked body {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  body,
+  #project-modal.project-modal--site,
+  #artist-modal.project-modal--site,
+  #education-modal.project-modal--site {
+    background-attachment: scroll !important;
+  }
+  #project-modal,
+  #artist-modal,
+  #education-modal {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y pinch-zoom;
+  }
 }
 html.is-scroll-locked nav{
   padding-right: calc(48px + var(--scrollbar-width, 0px));
@@ -3281,8 +3306,30 @@ if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' ||
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, CustomEase);
 
 let scrollLockDepth = 0;
+let touchScrollLockY = 0;
+const TOUCH_DEVICE_MQ = window.matchMedia('(hover: none), (pointer: coarse)');
+
+function isTouchDevice() {
+  return TOUCH_DEVICE_MQ.matches;
+}
+
+function isPinchZoomed() {
+  const vv = window.visualViewport;
+  return vv ? Math.abs(vv.scale - 1) > 0.02 : false;
+}
+
 function lockPageScroll() {
   if (scrollLockDepth++ > 0) return;
+  if (isTouchDevice()) {
+    touchScrollLockY = window.scrollY;
+    document.body.style.top = `-${touchScrollLockY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.style.position = 'fixed';
+    document.documentElement.classList.add('is-scroll-locked');
+    return;
+  }
   const scrollbarWidth = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
   document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
   document.documentElement.classList.add('is-scroll-locked');
@@ -3293,6 +3340,14 @@ function unlockPageScroll() {
   if (scrollLockDepth > 0) return;
   document.documentElement.classList.remove('is-scroll-locked');
   document.documentElement.style.removeProperty('--scrollbar-width');
+  if (document.body.style.position === 'fixed') {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, touchScrollLockY);
+  }
 }
 
 function resetProjectModalScroll() {
@@ -3831,9 +3886,11 @@ function purgeDisconnectedMatchSizeRows() {
 }
 
 function scheduleMatchSizeRelayout() {
+  if (isPinchZoomed()) return;
   purgeDisconnectedMatchSizeRows();
   cancelAnimationFrame(matchSizeRaf);
   matchSizeRaf = requestAnimationFrame(() => {
+    if (isPinchZoomed()) return;
     matchSizeRows.forEach((row) => {
       if (row.isConnected && typeof row._matchSizeApply === 'function') {
         row._matchSizeApply();
@@ -3845,6 +3902,7 @@ function scheduleMatchSizeRelayout() {
 if (!window._matchSizeResizeBound) {
   window._matchSizeResizeBound = true;
   window.addEventListener('resize', scheduleMatchSizeRelayout, { passive: true });
+  window.visualViewport?.addEventListener('resize', scheduleMatchSizeRelayout, { passive: true });
 }
 
 function equalizeDrafttMatchSizeRow(rowEl) {
@@ -4064,22 +4122,23 @@ cards.forEach(card => {
     setModalGallery(card, title);
     lockPageScroll();
 
-    gsap.set(modal, { display: 'block', opacity: 0, yPercent: 30 });
+    const touchModalMotion = isTabletCardColorMode();
+    gsap.set(modal, touchModalMotion
+      ? { display: 'block', opacity: 0, clearProps: 'yPercent,transform' }
+      : { display: 'block', opacity: 0, yPercent: 30 });
     resetProjectModalScroll();
     showProjectCloseBtn(0.15);
 
     const tlModal = gsap.timeline({
       onComplete: () => {
         resetDesktopCursorState();
+        if (touchModalMotion) gsap.set(modal, { clearProps: 'transform,yPercent' });
       }
     });
 
-    tlModal.to(modal, {
-      opacity: 1,
-      yPercent: 0,
-      duration: 0.8,
-      ease: "reveal"
-    })
+    tlModal.to(modal, touchModalMotion
+      ? { opacity: 1, duration: 0.8, ease: "reveal" }
+      : { opacity: 1, yPercent: 0, duration: 0.8, ease: "reveal" })
     .fromTo(['.modal-num', '.modal-title'], {
       y: 40, opacity: 0
     }, {
@@ -4192,6 +4251,7 @@ function finishCloseModal() {
   stopModalVideos();
   resetProjectModalScroll();
   modal.style.display = 'none';
+  gsap.set(modal, { clearProps: 'opacity,yPercent,transform' });
   document.body.classList.remove('project-modal-open');
   if (closeBtn) gsap.set(closeBtn, { clearProps: 'opacity' });
   modal.classList.remove('project-modal--site');
@@ -4210,13 +4270,10 @@ function closeModal() {
   unlockPageScroll();
   hideProjectCloseBtn();
 
-  gsap.to(modal, {
-    opacity: 0,
-    yPercent: 20,
-    duration: 0.6,
-    ease: "power3.inOut",
-    onComplete: finishCloseModal
-  });
+  const touchModalMotion = isTabletCardColorMode();
+  gsap.to(modal, touchModalMotion
+    ? { opacity: 0, duration: 0.6, ease: "power3.inOut", onComplete: finishCloseModal }
+    : { opacity: 0, yPercent: 20, duration: 0.6, ease: "power3.inOut", onComplete: finishCloseModal });
 }
 
 /* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
