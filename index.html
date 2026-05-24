@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Portfolio — Graphic Designer</title>
 <meta name="description" content="Graphic designer portfolio — curated works in branding, editorial, and visual identity."/>
+<link rel="icon" href="bird.webp" type="image/webp"/>
+<link rel="shortcut icon" href="bird.webp" type="image/webp"/>
+<link rel="apple-touch-icon" href="bird.webp"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -1161,8 +1164,13 @@ body.project-modal-open .modal-close-btn--project::after {
 .modal-gallery--sapar .draftt-gallery-caption,
 .modal-gallery--sanaga .draftt-gallery-caption,
 .modal-gallery--kiko .draftt-gallery-caption,
-.modal-gallery--moleskine .draftt-gallery-caption {
+.modal-gallery--moleskine .draftt-gallery-caption,
+.modal-gallery--matchaverde .draftt-gallery-caption {
   color: #666;
+}
+.modal-gallery--matchaverde .draftt-gallery-item--logo-single .draftt-gallery-media img,
+.modal-gallery--matchaverde .draftt-gallery-row--1 .draftt-gallery-item--logo-single img {
+  max-width: min(960px, 100%);
 }
 /* Kiko Milano — видео в галерее */
 .draftt-gallery-item--video .draftt-gallery-media--video {
@@ -2478,6 +2486,7 @@ body.project-modal-open .modal-close-btn--project::after {
       <a href="#" id="work-nav-trigger">Work</a>
       <ul class="work-dropdown" id="work-dropdown">
         <li class="work-dropdown-label">Graphic Designer</li>
+        <li><a href="#" data-project-target="13">Matcha Verde</a></li>
         <li><a href="#" data-project-target="01">Draftt</a></li>
         <li><a href="#" data-project-target="02">Linea</a></li>
         <li><a href="#" data-project-target="03">Athena</a></li>
@@ -2569,7 +2578,34 @@ body.project-modal-open .modal-close-btn--project::after {
        в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
   <main id="grid">
     <h2 class="category-header" id="cat-graphic-designer">Graphic Designer</h2>
-    <!-- в•ђв•ђ РљРђР РўРћР§РљРђ 1 в•ђв•ђ -->
+    <!-- ══ КАРТОЧКА 1 — Matcha Verde ══ -->
+    <div class="project-card-wrapper">
+      <article class="project-card project-card--color proj-ar-4-5" data-project="13"
+               data-title="Matcha Verde"
+               data-client="MATCHA VERDE"
+               data-role="Illustrator, Print designer, Maskot design, Brand Identity"
+               data-software="Procreate, Figma, InDesign"
+               data-year="2026"
+               data-img="Matcha verde/matchacup.webp"
+               data-gallery="portfolio"
+               data-desc="MATCHA VERDE is a café identity created for a local matcha, coffee and soft bakery spot. The goal was to design a bright, flexible and memorable visual system for a coffee shop that feels comfortable and warm. Local cafés often rely on generic minimal branding and disconnected printed materials. The challenge was to create a visual identity that feels friendly and instantly recognizable across every customer touchpoint.">
+        <img class="project-img"
+             src="Matcha verde/matchacup.webp"
+             alt="Matcha Verde — café brand identity"/>
+        <div class="project-highlight-outline"></div>
+        <div class="project-highlight-scan"></div>
+        <div class="project-highlight-flash"></div>
+      </article>
+      <div class="project-card-footer">
+        <div>
+          <h2 class="project-card-title">Matcha Verde</h2>
+          <p class="project-card-meta">Brand Identity · 2026</p>
+        </div>
+        <span class="project-card-num">01</span>
+      </div>
+    </div>
+
+    <!-- ══ КАРТОЧКА 2 — Draftt ══ -->
     <div class="project-card-wrapper">
       <article class="project-card project-card--color proj-ar-4-5" data-project="01"
                data-title="Draftt"
@@ -2592,11 +2628,11 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">Draftt</h2>
           <p class="project-card-meta">Brand Identity · 2025</p>
         </div>
-        <span class="project-card-num">01</span>
+        <span class="project-card-num">02</span>
       </div>
     </div>
 
-    <!-- ══ КАРТОЧКА 2 — Linea ══ -->
+    <!-- ══ КАРТОЧКА 3 — Linea ══ -->
     <div class="project-card-wrapper">
       <article class="project-card project-card--color proj-ar-4-5" data-project="02"
                data-title="Linea"
@@ -2619,11 +2655,11 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">Linea</h2>
           <p class="project-card-meta">Brand Identity · 2025</p>
         </div>
-        <span class="project-card-num">02</span>
+        <span class="project-card-num">03</span>
       </div>
     </div>
 
-    <!-- ══ КАРТОЧКА 3 — Athena ══ -->
+    <!-- ══ КАРТОЧКА 4 — Athena ══ -->
     <div class="project-card-wrapper">
       <article class="project-card project-card--color proj-ar-4-5" data-project="03"
                data-title="Athena"
@@ -2646,11 +2682,11 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">Athena</h2>
           <p class="project-card-meta">Brand Identity · 2025</p>
         </div>
-        <span class="project-card-num">03</span>
+        <span class="project-card-num">04</span>
       </div>
     </div>
 
-    <!-- ══ КАРТОЧКА 4 — Vit Nastaivaet ══ -->
+    <!-- ══ КАРТОЧКА 5 — Vit Nastaivaet ══ -->
     <div class="project-card-wrapper">
       <article class="project-card project-card--color proj-ar-4-5" data-project="08"
                data-title="Vit Nastaivaet"
@@ -2673,11 +2709,11 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">Vit Nastaivaet</h2>
           <p class="project-card-meta">Branding &amp; Packaging · 2025</p>
         </div>
-        <span class="project-card-num">04</span>
+        <span class="project-card-num">05</span>
       </div>
     </div>
 
-    <!-- ══ КАРТОЧКА 5 — Sapar ══ -->
+    <!-- ══ КАРТОЧКА 6 — Sapar ══ -->
     <div class="project-card-wrapper">
       <article class="project-card project-card--color proj-ar-4-5" data-project="09"
                data-title="Sapar"
@@ -2700,7 +2736,7 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">Sapar</h2>
           <p class="project-card-meta">Editorial · 2024</p>
         </div>
-        <span class="project-card-num">05</span>
+        <span class="project-card-num">06</span>
       </div>
     </div>
 
@@ -2728,7 +2764,7 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">Kiko Milano</h2>
           <p class="project-card-meta">AI Visual · 2026</p>
         </div>
-        <span class="project-card-num">06</span>
+        <span class="project-card-num">07</span>
       </div>
     </div>
 
@@ -2755,7 +2791,7 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">Moleskine</h2>
           <p class="project-card-meta">AI Visual · 2026</p>
         </div>
-        <span class="project-card-num">07</span>
+        <span class="project-card-num">08</span>
       </div>
     </div>
 
@@ -2783,7 +2819,7 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">Sanaga Yong Chimpanzee Rescue</h2>
           <p class="project-card-meta">Illustration · 2025</p>
         </div>
-        <span class="project-card-num">08</span>
+        <span class="project-card-num">09</span>
       </div>
     </div>
 
@@ -2810,7 +2846,7 @@ body.project-modal-open .modal-close-btn--project::after {
           <h2 class="project-card-title">This Is Me</h2>
           <p class="project-card-meta">Illustration · 2024</p>
         </div>
-        <span class="project-card-num">09</span>
+        <span class="project-card-num">10</span>
       </div>
     </div>
 
@@ -3620,6 +3656,26 @@ const VITNASTAIVAET_GALLERY_ROWS = [
   { cols: 1, items: [{ src: 'vitnastaivaet/sticker.webp', label: 'Sticker' }] }
 ];
 
+const MATCHA_VERDE_FOLDER = 'Matcha verde';
+
+const MATCHA_VERDE_GALLERY_ROWS = [
+  { cols: 1, items: [{ src: `${MATCHA_VERDE_FOLDER}/logo.webp`, label: 'Logo' }] },
+  { cols: 2, rowClass: 'draftt-gallery-row--match-size', items: [
+    { src: `${MATCHA_VERDE_FOLDER}/matchacup.webp`, label: 'Product' },
+    { src: `${MATCHA_VERDE_FOLDER}/bag.webp`, label: 'Packaging' }
+  ]},
+  { cols: 1, items: [{ src: `${MATCHA_VERDE_FOLDER}/window.webp`, label: 'Visual' }] },
+  { cols: 2, rowClass: 'draftt-gallery-row--match-size', items: [
+    { src: `${MATCHA_VERDE_FOLDER}/hero.webp`, label: 'Hero' },
+    { src: `${MATCHA_VERDE_FOLDER}/sticker.webp`, label: 'Sticker' }
+  ]},
+  { cols: 2, rowClass: 'draftt-gallery-row--match-size', items: [
+    { src: `${MATCHA_VERDE_FOLDER}/menumocuo.webp`, label: 'Menu mockup' },
+    { src: `${MATCHA_VERDE_FOLDER}/menu.webp`, label: 'Menu' }
+  ]},
+  { cols: 1, items: [{ src: `${MATCHA_VERDE_FOLDER}/card.webp`, label: 'Illustration' }] }
+];
+
 const SAPAR_GALLERY_ROWS = [
   { cols: 1, items: [{ src: 'sapar/floor.webp', label: 'Visual' }] },
   { cols: 2, items: [
@@ -3720,7 +3776,8 @@ const PORTFOLIO_GALLERIES = {
   '09': SAPAR_GALLERY_ROWS,
   '10': SANAGA_GALLERY_ROWS,
   '11': KIKO_GALLERY_ROWS,
-  '12': MOLESKINE_GALLERY_ROWS
+  '12': MOLESKINE_GALLERY_ROWS,
+  '13': MATCHA_VERDE_GALLERY_ROWS
 };
 
 function isPortfolioProject(projectId) {
@@ -3917,7 +3974,8 @@ function setModalGallery(card, title) {
     (projectId === '09' ? ' modal-gallery--sapar' : '') +
     (projectId === '10' ? ' modal-gallery--sanaga' : '') +
     (projectId === '11' ? ' modal-gallery--kiko' : '') +
-    (projectId === '12' ? ' modal-gallery--moleskine' : '');
+    (projectId === '12' ? ' modal-gallery--moleskine' : '') +
+    (projectId === '13' ? ' modal-gallery--matchaverde' : '');
   purgeDisconnectedMatchSizeRows();
   mGallery.innerHTML = '';
 
