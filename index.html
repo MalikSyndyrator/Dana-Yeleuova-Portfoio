@@ -78,6 +78,10 @@ html.is-scroll-locked{
     -webkit-overflow-scrolling: touch;
     touch-action: manipulation;
   }
+  #project-modal .draftt-gallery-row {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 420px;
+  }
 }
 html.is-scroll-locked nav{
   padding-right: calc(48px + var(--scrollbar-width, 0px));
@@ -3503,8 +3507,12 @@ const TABLET_MQ = window.matchMedia('(max-width: 1366px)');
 const mobileCardColorTriggers = [];
 let modalOpenProjectCard = null;
 let modalOpenTl = null;
+let modalScrollPauseTimer = null;
+let modalScrollPauseHandler = null;
 
 const MODAL_REVEAL_SEL = '.modal-num, .modal-title, .modal-meta-item, .modal-content-rich, .modal-gallery-img, .draftt-gallery-item';
+const MODAL_TOUCH_HEADER_SEL = '.modal-num, .modal-title, .modal-meta-item, .modal-content-rich';
+const MODAL_TOUCH_GALLERY_SEL = '.modal-gallery-img, .draftt-gallery-item';
 
 function preserveModalScroll(apply) {
   const scrollTop = modal ? modal.scrollTop : 0;
@@ -3512,7 +3520,43 @@ function preserveModalScroll(apply) {
   if (modal) modal.scrollTop = scrollTop;
 }
 
+function unbindModalOpenScrollPause() {
+  clearTimeout(modalScrollPauseTimer);
+  if (modal && modalScrollPauseHandler) {
+    modal.removeEventListener('scroll', modalScrollPauseHandler);
+  }
+  modalScrollPauseHandler = null;
+}
+
+function bindModalOpenScrollPause() {
+  unbindModalOpenScrollPause();
+  if (!modal) return;
+  modalScrollPauseHandler = () => {
+    if (modalOpenTl?.isActive()) modalOpenTl.pause();
+    clearTimeout(modalScrollPauseTimer);
+    modalScrollPauseTimer = setTimeout(() => {
+      if (modalOpenTl?.paused()) modalOpenTl.resume();
+    }, 100);
+  };
+  modal.addEventListener('scroll', modalScrollPauseHandler, { passive: true });
+}
+
+function waitModalScrollIdle(fn) {
+  let timer;
+  const done = () => {
+    if (modal) modal.removeEventListener('scroll', onScroll);
+    fn();
+  };
+  const onScroll = () => {
+    clearTimeout(timer);
+    timer = setTimeout(done, 120);
+  };
+  if (modal) modal.addEventListener('scroll', onScroll, { passive: true });
+  timer = setTimeout(done, 120);
+}
+
 function killModalOpenAnimation() {
+  unbindModalOpenScrollPause();
   if (modalOpenTl) {
     modalOpenTl.kill();
     modalOpenTl = null;
@@ -3540,38 +3584,50 @@ function flushDeferredMatchSizeRows() {
   });
 }
 
+function finishTouchModalOpen() {
+  preserveModalScroll(() => {
+    gsap.set(modal, { clearProps: 'yPercent,transform' });
+  });
+  flushDeferredMatchSizeRows();
+  resetDesktopCursorState();
+}
+
 function buildModalOpenTimeline(projectId, touchModalMotion) {
   modalOpenTl = gsap.timeline({
     onComplete: () => {
       modalOpenTl = null;
+      unbindModalOpenScrollPause();
+      if (touchModalMotion) {
+        waitModalScrollIdle(finishTouchModalOpen);
+        return;
+      }
       preserveModalScroll(() => {
         gsap.set(modal, { clearProps: 'yPercent,transform' });
-        if (!touchModalMotion) setModalRevealInstant();
+        setModalRevealInstant();
       });
-      if (touchModalMotion) flushDeferredMatchSizeRows();
       resetDesktopCursorState();
     }
   });
 
   if (touchModalMotion) {
     gsap.set(modal, { display: 'block', opacity: 0, clearProps: 'yPercent,transform' });
-    gsap.set(MODAL_REVEAL_SEL, { opacity: 0, y: 0 });
+    gsap.set(MODAL_TOUCH_HEADER_SEL, { opacity: 0, y: 0 });
+    gsap.set(MODAL_TOUCH_GALLERY_SEL, { opacity: 1, y: 0 });
     gsap.set('.modal-hero-img-wrap', { clipPath: 'inset(0% 0 0 0)' });
     gsap.set('.modal-hero-img', { scale: 1 });
 
-    modalOpenTl.to(modal, { opacity: 1, duration: 0.65, ease: 'reveal' })
+    modalOpenTl.to(modal, { opacity: 1, duration: 0.55, ease: 'reveal' })
       .to(['.modal-num', '.modal-title'], {
-        opacity: 1, duration: 0.5, stagger: 0.08, ease: 'expo.out'
-      }, '-=0.45')
-      .to('.modal-meta-item', {
         opacity: 1, duration: 0.45, stagger: 0.06, ease: 'expo.out'
-      }, '-=0.35')
-      .to('.modal-content-rich', {
-        opacity: 1, duration: 0.5, ease: 'expo.out'
+      }, '-=0.4')
+      .to('.modal-meta-item', {
+        opacity: 1, duration: 0.4, stagger: 0.05, ease: 'expo.out'
       }, '-=0.3')
-      .to(['.modal-gallery-img', '.draftt-gallery-item'], {
-        opacity: 1, duration: 0.5, stagger: 0.05, ease: 'expo.out'
-      }, '-=0.35');
+      .to('.modal-content-rich', {
+        opacity: 1, duration: 0.45, ease: 'expo.out'
+      }, '-=0.25');
+
+    bindModalOpenScrollPause();
     return;
   }
 
@@ -4023,7 +4079,7 @@ function purgeDisconnectedMatchSizeRows() {
 }
 
 function scheduleMatchSizeRelayout() {
-  if (isPinchZoomed()) return;
+  if (isPinchZoomed() || modalOpenTl) return;
   purgeDisconnectedMatchSizeRows();
   cancelAnimationFrame(matchSizeRaf);
   matchSizeRaf = requestAnimationFrame(() => {
