@@ -4144,22 +4144,47 @@ cards.forEach(card => {
     lockPageScroll();
 
     const touchModalMotion = isTabletCardColorMode();
-    gsap.set(modal, touchModalMotion
-      ? { display: 'block', opacity: 0, clearProps: 'yPercent,transform' }
-      : { display: 'block', opacity: 0, yPercent: 30 });
+    if (touchModalMotion) {
+      gsap.killTweensOf([
+        modal,
+        '.modal-num',
+        '.modal-title',
+        '.modal-meta-item',
+        '.modal-content-rich',
+        '.modal-gallery-img',
+        '.draftt-gallery-item'
+      ]);
+      gsap.set(modal, { display: 'block', opacity: 1, clearProps: 'yPercent,transform' });
+      resetProjectModalScroll();
+      showProjectCloseBtn(0);
+      gsap.set([
+        '.modal-num',
+        '.modal-title',
+        '.modal-meta-item',
+        '.modal-content-rich',
+        '.modal-gallery-img',
+        '.draftt-gallery-item'
+      ], { opacity: 1, clearProps: 'transform,y' });
+      resetDesktopCursorState();
+      return;
+    }
+
+    gsap.set(modal, { display: 'block', opacity: 0, yPercent: 30 });
     resetProjectModalScroll();
     showProjectCloseBtn(0.15);
 
     const tlModal = gsap.timeline({
       onComplete: () => {
         resetDesktopCursorState();
-        if (touchModalMotion) gsap.set(modal, { clearProps: 'transform,yPercent' });
       }
     });
 
-    tlModal.to(modal, touchModalMotion
-      ? { opacity: 1, duration: 0.8, ease: "reveal" }
-      : { opacity: 1, yPercent: 0, duration: 0.8, ease: "reveal" })
+    tlModal.to(modal, {
+      opacity: 1,
+      yPercent: 0,
+      duration: 0.8,
+      ease: "reveal"
+    })
     .fromTo(['.modal-num', '.modal-title'], {
       y: 40, opacity: 0
     }, {
